@@ -2,66 +2,102 @@
 #define SHELL_H
 
 #include <stdio.h>
+#include <wchar.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <errno.h>
-#include <stddef.h>
-#include <sys/stat.h>
-#include <signal.h>
 
-int _putchar(char c);
-void _puts(char *str);
-int _strlen(char *s);
+/**
+ * struct error_msg - An structure for each error message
+ *
+ * @ecode: error code
+ * @msg: pointer to error message
+ * @size: error message length.
+ */
+typedef struct error_msg
+{
+	int ecode;
+	char *msg;
+	int  size;
+} error_msg_t;
+
+/**
+ * struct built_s - Builtings commands
+ * @command: command name.
+ * @f: function to call.
+ *
+ * Description: Longer description
+ */
+typedef struct built_s
+{
+	char *command;
+	void (*f)(char **);
+} built_t;
+
+/**
+ * struct history - An structure for each command readed
+ *
+ * @id_h: error code
+ * @comms: Commands
+ * @prev: Previous element
+ * @next: Next element
+ */
+
+typedef struct history
+{
+	unsigned int id_h;
+	char *comms;
+	struct history *prev;
+	struct history *next;
+} history_t;
+
+/**
+ * struct command_s - An structure for each command
+ *
+ * @command: command with arguments.
+ * @next: pointer to next command.
+ */
+typedef struct command_s
+{
+	char **command;
+	struct command_s *next;
+} command_t;
+
+/* Shell functions */
+command_t **_prompt(char *, char *);
+int _fork(char *, command_t *, char *, char **);
+int _stat(char *, char *);
+int _exec(char *, char **, char **);
+
+/* Utilities */
+char *read_line(void);
+
+size_t _strlen(char *str);
+command_t *_parser_cmd(char *, char *);
+size_t _parser_arg(char *, char **, size_t *);
+void print_char_pointer_arr(char **, size_t);
+int add_nodeint(history_t **head, char *str);
 char *_strdup(char *str);
-char *concat_all(char *name, char *sep, char *value);
+void free_listint(history_t *head);
+void print_listint(const history_t *);
+char *find_path(char **);
+char *_strstr(char *haystack, char *needle);
+void print_env(char **);
+char *_which(char *p_rec, char *first_arg);
+char *string_nconcat(char *s1, char *s2, unsigned int n);
+int _strcmp(char *s1, char *s2);
+void _exit_func(char **);
+int verif_built_comm(char *str, char **env);
 
-char **splitstring(char *str, const char *delim);
-void execute(char **argv);
-void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
+/* Error handler */
+void error_handler(char *, int);
+void error_handler_set_default(int, char *);
 
-
-extern char **environ;
-
-/**
- * struct list_path - Linked list containing PATH directories
- * @dir: directory in path
- * @p: pointer to next node
- */
-typedef struct list_path
-{
-	char *dir;
-	struct list_path *p;
-} list_path;
-
-
-char *_getenv(const char *name);
-list_path *add_node_end(list_path **head, char *str);
-list_path *linkpath(char *path);
-char *_which(char *filename, list_path *head);
-
-/**
- * struct mybuild - pointer to function with corresponding buildin command
- * @name: buildin command
- * @func: execute the buildin command
- */
-typedef struct mybuild
-{
-	char *name;
-	void (*func)(char **);
-} mybuild;
-
-void(*checkbuild(char **arv))(char **arv);
-int _atoi(char *s);
-void exitt(char **arv);
-void env(char **arv);
-void _setenv(char **arv);
-void _unsetenv(char **arv);
-
-void freearv(char **arv);
-void free_list(list_path *head);
-
+/* Command Utilities */
+command_t *new_cmd_node(char *);
+void add_tok_to_cmd(char *, command_t *, size_t, char *);
 
 #endif
