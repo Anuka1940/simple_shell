@@ -1,83 +1,64 @@
 #include "shell.h"
 /**
- * count_words - counts separate words in string
- * @str: pointer to s
- * @delim: delimiter
- * Return: number of words
+ * check_delim - Checks If A Character Match Any Char *
+ * @c: Character To Check
+ * @str: String To Check
+ * Return: 1 Succes, 0 Failed
  */
-int count_words(char *str, char delim)
+unsigned int check_delim(char c, const char *str)
 {
-	int i, count;
+	unsigned int i;
 
-	i = 0;
-	count = 0;
-	while (str[i] != '\0')
+	for (i = 0; str[i] != '\0'; i++)
 	{
-		if (str[i] != delim && (str[i + 1] == delim || str[i + 1]  ==
-					'\t' || str[i + 1] == '\0'))
-			count++;
-		i++;
+		if (c == str[i])
+			return (1);
 	}
-	return (count);
+	return (0);
 }
-/**
- * _wrdlen - returns the lenght of a word
- * @s: pointer to s
- * @delim: delimiter
- * Return: lenght
- */
-int _wrdlen(char *s, char delim)
-{
-	int c = 0; /* count  */
 
-	while (*(s + c) != delim && *(s + c) != '\0' && *(s + c) != '\t')
-		c++;
-	return (c);
-}
 /**
- * strtow - splits a string into words
- * @str: string to break
- * @delim: delimiter
- * Return: array of strings(words)
+ * _strtok - Token A String Into Token (strtrok)
+ * @str: String
+ * @delim: Delimiter
+ * Return: Pointer To The Next Token Or NULL
  */
-char **strtow(char *str, char delim)
+char *_strtok(char *str, const char *delim)
 {
-	int i, j, k, h, c, len;
-	char **words;
+	static char *ts;
+	static char *nt;
+	unsigned int i;
 
-	if (str == NULL || str[0] == '\0')
+	if (str != NULL)
+		nt = str;
+	ts = nt;
+	if (ts == NULL)
 		return (NULL);
-	c = count_words(str, delim);
-	if (c == 0)
-		return (NULL);
-	words = malloc(sizeof(char *) * (c + 1));
-	if (words == NULL)
-		return (NULL);
-	i = 0;
-	j = 0;
-	while (str[i] != '\0')
+	for (i = 0; ts[i] != '\0'; i++)
 	{
-		while ((str[i] == delim || str[i] == '\t') && str[i] != '\0')
-			i++;
-		if (str[i] == '\0')
-		{
-			words[j] = NULL;
-			return (words);
-		}
-		words[j] = malloc(sizeof(char) * (_wrdlen(str + i, delim) + 1));
-		if (words[j] == NULL)
-		{
-			for (k = j - 1; k >= 0; k--)
-				free(words[k]);
-			free(words);
-			return (NULL);
-		}
-		len = _wrdlen(str + i, delim);
-		for (h = 0; h < len && str[i] != '\0'; h++, i++)
-			words[j][h] = str[i];
-		words[j][h] = '\0';
-		j++;
+		if (check_delim(ts[i], delim) == 0)
+			break;
 	}
-	words[j] = NULL;
-	return (words);
+	if (nt[i] == '\0' || nt[i] == '#')
+	{
+		nt = NULL;
+		return (NULL);
+	}
+	ts = nt + i;
+	nt = ts;
+	for (i = 0; nt[i] != '\0'; i++)
+	{
+		if (check_delim(nt[i], delim) == 1)
+			break;
+	}
+	if (nt[i] == '\0')
+		nt = NULL;
+	else
+	{
+		nt[i] = '\0';
+		nt = nt + i + 1;
+		if (*nt == '\0')
+			nt = NULL;
+	}
+	return (ts);
 }
